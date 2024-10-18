@@ -1,0 +1,5 @@
+const BRAINTREE_CONSTANTS = {
+  BRAINTREE: "BRAINTREE",
+};
+
+module.exports = BRAINTREE_CONSTANTS;

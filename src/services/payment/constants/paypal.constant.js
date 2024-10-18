@@ -1,0 +1,12 @@
+const PAYMENT_CONSTANTS = require("./payment.constant");
+
+const PAYPAL_CONSTANTS = {
+  PAYPAL: "PAYPAL",
+  CURRENCIES: [
+    PAYMENT_CONSTANTS.USD,
+    PAYMENT_CONSTANTS.AUD,
+    PAYMENT_CONSTANTS.EUR,
+  ],
+};
+
+module.exports = PAYPAL_CONSTANTS;

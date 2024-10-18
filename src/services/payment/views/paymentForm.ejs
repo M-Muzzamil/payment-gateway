@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Form</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>Make a Payment</h1>
+
+    <div id="responseMessageErr">
+    <%  if (error) { %>
+        <div>
+            <p>Error: <%= error.message %> - <%= error.reason %></p>
+        </div>
+    <% } %>
+    </div>
+    <div id="responseMessage">
+        <% if (data && data.transactionId) { %>
+            <div>
+                <p>Payment was successful! Your transaction ID is: <%= data.transactionId %></p>
+            </div>
+        <% } %>
+    </div>
+    <form id="paymentForm" action="/payment" method="POST">
+        <fieldset>
+            <legend>Order Details</legend>
+            <label for="amount">Price (Amount):</label>
+            <input type="number" step="0.01" id="amount" name="amount" required>
+
+            <label for="currency">Currency:</label>
+            <select id="currency" name="currency" required>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="THB">THB</option>
+                <option value="HKD">HKD</option>
+                <option value="SGD">SGD</option>
+                <option value="AUD">AUD</option>
+            </select>
+
+            <label for="customerName">Customer Full Name:</label>
+            <input type="text" id="customerName" name="customerName" required>
+        </fieldset>
+
+        <fieldset>
+            <legend>Payment Details</legend>
+            <label for="cardholderName">Credit Card Holder Name:</label>
+            <input type="text" id="cardholderName" name="cardholderName" required>
+
+            <label for="cardNumber">Credit Card Number:</label>
+            <input type="text" id="cardNumber" name="cardNumber" required>
+
+            <label for="expirationMonth">Expiration Month:</label>
+            <input type="number" id="expirationMonth" name="expirationMonth" min="1" max="12" required>
+
+            <label for="expirationYear">Expiration Year:</label>
+            <input type="number" id="expirationYear" name="expirationYear" min="<%= new Date().getFullYear() %>" required>
+
+            <label for="cvv">CVV:</label>
+            <input type="text" id="cvv" name="cvv" required>
+        </fieldset>
+
+        <button type="submit">Submit Payment</button>
+    </form>
+
+    <script>
+        document.getElementById('paymentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            document.getElementById('responseMessage').innerHTML = '';
+            document.getElementById('responseMessageErr').innerHTML = '';
+            const paylaod = {
+                amount: document.getElementById('amount').value,
+                currency: document.getElementById('currency').value,
+                customerName: document.getElementById('customerName').value,
+                cardHolderName: document.getElementById('cardholderName').value,
+                cardNumber: document.getElementById('cardNumber').value,
+                expirationMonth: document.getElementById('expirationMonth').value,
+                expirationYear: document.getElementById('expirationYear').value,
+                cvv: document.getElementById('cvv').value,
+            };
+
+            fetch('/payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(paylaod)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.code === 200 && data.data.transactionId) {
+                    document.getElementById('responseMessage').innerHTML = `
+                        <div>
+                            <p>Payment was successful! Your transaction ID is: ${data.data.transactionId}</p>
+                        </div>
+                    `;
+                } else if (data.error) {
+                    document.getElementById('responseMessageErr').innerHTML = `
+                        <div>
+                            <p>Error: ${data.error.message || 'An error occurred during payment processing.'} - Reason: ${data.error.reason || ''}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.getElementById('responseMessageErr').innerHTML = `
+                    <div>
+                        <p>Error: ${error.message || 'An error occurred.'}</p>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
